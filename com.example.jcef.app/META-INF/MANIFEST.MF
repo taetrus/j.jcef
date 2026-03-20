@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JCEF Browser Application
+Bundle-SymbolicName: com.example.jcef.app
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.example.jcef.app.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Import-Package: org.osgi.framework;version="1.10.0"
+Bundle-ClassPath: .,
+ lib/jcefmaven.jar,
+ lib/jcef-api.jar,
+ lib/gluegen-rt.jar,
+ lib/jogl-all.jar,
+ lib/gson.jar,
+ lib/commons-compress.jar
+Bundle-ActivationPolicy: lazy

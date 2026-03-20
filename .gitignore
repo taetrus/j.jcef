@@ -1,0 +1,22 @@
+target/
+bin/
+*.class
+
+# JCEF JARs downloaded by setup script (re-generate with scripts/setup.sh)
+com.example.jcef.app/lib/*.jar
+
+# JCEF native binaries (extracted at runtime)
+jcef-bundle/
+
+# Conversation exports
+*.txt
+
+# macOS
+.DS_Store
+
+# IDE
+.project
+.classpath
+.settings/
+*.iml
+.idea/

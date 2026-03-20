@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.jcef</groupId>
+    <artifactId>com.example.jcef.parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>JCEF OSGi Browser - Parent</name>
+
+    <properties>
+        <tycho.version>4.0.4</tycho.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jcefmaven.version>122.1.10</jcefmaven.version>
+    </properties>
+
+    <modules>
+        <module>com.example.jcef.app</module>
+    </modules>
+
+    <!--
+        P2 repository for OSGi framework resolution.
+        For airgapped networks: mirror this repo using Eclipse p2 mirror tools:
+          eclipse -application org.eclipse.equinox.p2.artifact.repository.mirrorApplication \
+            -source https://download.eclipse.org/eclipse/updates/4.30/ \
+            -destination file:///path/to/local/p2-mirror
+        Then change the URL below to the local mirror path.
+    -->
+    <repositories>
+        <repository>
+            <id>eclipse-platform-4.30</id>
+            <layout>p2</layout>
+            <url>https://download.eclipse.org/eclipse/updates/4.30/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>${tycho.version}</version>
+                <configuration>
+                    <executionEnvironment>JavaSE-17</executionEnvironment>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
