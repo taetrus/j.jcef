@@ -10,6 +10,10 @@
 #   ./scripts/setup.sh                     # default: uses Maven Central
 #   MAVEN_REPO_URL=https://nexus.internal/repository/maven-central ./scripts/setup.sh
 #
+# Windows users:
+#   Git Bash: run this script as-is (requires Git for Windows + Maven on PATH)
+#   PowerShell: use scripts/setup.ps1 instead
+#
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -17,6 +21,12 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 LIB_DIR="$PROJECT_DIR/com.example.jcef.app/lib"
 JCEF_VERSION="${JCEF_VERSION:-122.1.10}"
 MAVEN_REPO_URL="${MAVEN_REPO_URL:-https://repo1.maven.org/maven2}"
+
+# On Windows, Maven may be installed as mvn.cmd rather than mvn
+MVN_CMD="mvn"
+if ! command -v mvn &>/dev/null && command -v mvn.cmd &>/dev/null; then
+    MVN_CMD="mvn.cmd"
+fi
 
 echo "=== JCEF OSGi Project Setup ==="
 echo "JCEF Maven version: $JCEF_VERSION"
@@ -29,10 +39,10 @@ echo "── Downloading JCEF JARs to lib/ ──"
 mkdir -p "$LIB_DIR"
 
 # Create a temporary POM to resolve jcefmaven and its transitive deps
-TMPDIR=$(mktemp -d)
-trap "rm -rf $TMPDIR" EXIT
+TMP_WORK_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_WORK_DIR"' EXIT
 
-cat > "$TMPDIR/pom.xml" << POMEOF
+cat > "$TMP_WORK_DIR/pom.xml" << POMEOF
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <modelVersion>4.0.0</modelVersion>
@@ -56,8 +66,8 @@ cat > "$TMPDIR/pom.xml" << POMEOF
 POMEOF
 
 # Download all transitive deps (me.friwi + org.jogamp) to a staging dir
-STAGING="$TMPDIR/staging"
-mvn -f "$TMPDIR/pom.xml" dependency:copy-dependencies \
+STAGING="$TMP_WORK_DIR/staging"
+"$MVN_CMD" -f "$TMP_WORK_DIR/pom.xml" dependency:copy-dependencies \
     -DoutputDirectory="$STAGING" \
     -DincludeGroupIds=me.friwi,org.jogamp.gluegen,org.jogamp.jogl,com.google.code.gson,org.apache.commons \
     -q
@@ -124,7 +134,7 @@ echo ""
 echo "── Maven artifacts required in Nexus ──"
 echo "Ensure these artifacts are cached/proxied in your Nexus instance:"
 echo ""
-mvn -f "$TMPDIR/pom.xml" dependency:list -q \
+"$MVN_CMD" -f "$TMP_WORK_DIR/pom.xml" dependency:list -q \
     -DoutputAbsoluteArtifactFilename=false \
     2>/dev/null | grep ":.*:.*:" | sed 's/^\[INFO\] */  /' || \
     echo "  (run 'mvn dependency:list' manually on the temp POM to see the full list)"
