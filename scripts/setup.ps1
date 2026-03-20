@@ -20,7 +20,7 @@ $ErrorActionPreference = "Stop"
 
 $ScriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectDir = Split-Path -Parent $ScriptDir
-$LibDir     = Join-Path $ProjectDir "com.example.jcef.app\lib"
+$LibDir     = Join-Path $ProjectDir "com.example.jcef.browser\lib"
 
 $JcefVersion  = if ($env:JCEF_VERSION)   { $env:JCEF_VERSION }   else { "122.1.10" }
 $MavenRepoUrl = if ($env:MAVEN_REPO_URL) { $env:MAVEN_REPO_URL } else { "https://repo1.maven.org/maven2" }
@@ -109,7 +109,7 @@ try {
     # ── Step 2: Verify Bundle-ClassPath matches downloaded JARs ──────────────
 
     Write-Host "── Verifying MANIFEST.MF Bundle-ClassPath ──"
-    $ManifestPath    = Join-Path $ProjectDir "com.example.jcef.app\META-INF\MANIFEST.MF"
+    $ManifestPath    = Join-Path $ProjectDir "com.example.jcef.browser\META-INF\MANIFEST.MF"
     $ManifestContent = Get-Content $ManifestPath -Raw
     $Missing = $false
 

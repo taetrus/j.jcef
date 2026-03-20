@@ -17,6 +17,7 @@
     </properties>
 
     <modules>
+        <module>com.example.jcef.browser</module>
         <module>com.example.jcef.app</module>
         <module>com.example.jcef.product</module>
     </modules>
