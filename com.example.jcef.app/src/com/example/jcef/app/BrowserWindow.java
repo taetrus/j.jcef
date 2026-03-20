@@ -17,7 +17,7 @@ import java.io.File;
 
 public class BrowserWindow {
 
-    private static final String DEFAULT_URL = "https://example.com";
+    private static final String DEFAULT_URL = "https://www.apple.com";
     private static final String INSTALL_DIR = "jcef-bundle";
 
     public static void main(String[] args) throws Exception {

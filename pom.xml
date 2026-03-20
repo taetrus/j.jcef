@@ -18,6 +18,7 @@
 
     <modules>
         <module>com.example.jcef.app</module>
+        <module>com.example.jcef.product</module>
     </modules>
 
     <!--
@@ -52,6 +53,7 @@
                     <executionEnvironment>JavaSE-17</executionEnvironment>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
