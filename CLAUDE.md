@@ -24,11 +24,17 @@ mvn clean verify
 mvn clean package
 ```
 
-## Run Command
+## Run Commands
 
 ```bash
-# OSGi product (after mvn package — Equinox launches, Felix SCR wires IBrowserService):
+# Windows (after mvn package):
 .\com.example.jcef.product\target\products\com.example.jcef.product\win32\win32\x86_64\jcef-browser.exe
+
+# macOS (after mvn package):
+./com.example.jcef.product/target/products/com.example.jcef.product/macosx/cocoa/aarch64/Eclipse.app/Contents/MacOS/jcef-browser
+
+# Linux (after mvn package):
+./com.example.jcef.product/target/products/com.example.jcef.product/linux/gtk/x86_64/jcef-browser
 ```
 
 ## Architecture
@@ -38,7 +44,7 @@ mvn clean package
 - **Embedded JARs pattern** — JCEF JARs live in `com.example.jcef.browser/lib/` and are referenced via `Bundle-ClassPath` in its MANIFEST.MF. Only the `api` package is exported; JCEF internals stay encapsulated.
 - **OSGi Declarative Services** — Component descriptors are in `OSGI-INF/*.xml` (written manually; `tycho-ds-plugin` auto-runs but does not generate XML when the DS annotations package is marked optional). Felix SCR reads the descriptors and wires services at runtime.
 - **Product module** — `com.example.jcef.product` uses `eclipse-repository` packaging with a `.product` file. `mvn package` materializes a self-contained runnable product via `tycho-p2-director-plugin`.
-- **JCEF native binaries** (~100MB Chromium engine) are downloaded at runtime by jcefmaven into `jcef-bundle/`. For airgapped: run once on a connected machine, then copy that directory next to the executable.
+- **JCEF native binaries** (~100MB Chromium engine) are downloaded on first run by jcefmaven. The install directory is resolved in order: (1) `-Djcef.install.dir=<path>` system property, (2) `jcef-bundle/` next to the executable if it contains `install.lock`, (3) `~/.jcef-bundle/` as a stable fallback that survives `mvn clean` rebuilds. For airgapped deployment, pre-populate one of these locations from a connected machine.
 
 ## Module Structure
 
@@ -59,6 +65,7 @@ scripts/
 - `OSGI-INF/` must be listed in `bin.includes` in `build.properties` or the packaging step will fail.
 - New service interfaces must be added to `Export-Package` in the provider's MANIFEST.MF and `Import-Package` in the consumer's MANIFEST.MF.
 - The p2 repository URL in the parent `pom.xml` must be changed to a local mirror for airgapped builds.
-- macOS requires `-XstartOnFirstThread` JVM argument (already set in the `.product` launcher args).
+- macOS requires `-XstartOnFirstThread` and `--add-opens` for `sun.awt`, `sun.lwawt`, and `sun.lwawt.macosx` (already set in the `.product` launcher args). The `--add-opens` flags must use `=` format (e.g. `--add-opens=java.desktop/sun.awt=ALL-UNNAMED`) so the Equinox native launcher passes them correctly to the JVM.
 - Java 17+ required (`Bundle-RequiredExecutionEnvironment: JavaSE-17`).
-- For OSGi product deployment, copy `jcef-bundle/` next to `jcef-browser.exe`. The `install.lock` file tells jcefmaven to skip re-downloading.
+- For OSGi product deployment, either copy `jcef-bundle/` next to the executable or to `~/.jcef-bundle/`. The `install.lock` file tells jcefmaven to skip re-downloading. During development, `~/.jcef-bundle/` is preferred since it survives `mvn clean` rebuilds.
+- Do **not** copy JCEF JARs into `com.example.jcef.app/lib/` — only the browser bundle (`com.example.jcef.browser/lib/`) should contain them. The app bundle resolves the API via `Import-Package`.

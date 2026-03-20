@@ -148,26 +148,75 @@ JCEF wraps the Chromium Embedded Framework (CEF) for Java. The flow:
 5. `browser.getUIComponent()` returns a Swing `Component` you add to a JFrame
 
 The `jcefmaven` wrapper handles downloading and extracting the ~100MB native
-Chromium binaries on first run. For airgapped use, pre-extract these into
-`jcef-bundle/` — the library detects `install.lock` and skips the download.
+Chromium binaries on first run. The app looks for natives in this order:
+
+1. **`-Djcef.install.dir=<path>`** — explicit override via system property
+2. **`jcef-bundle/`** next to the executable — if it contains `install.lock`
+3. **`~/.jcef-bundle/`** — stable fallback that survives `mvn clean` rebuilds
+
+Think of it like a package delivery: if you already have the package at your
+door (option 2) or in your garage (option 3), the courier skips the trip.
+The `install.lock` file is the "delivered" sticker — jcefmaven sees it and
+skips downloading entirely.
+
+For airgapped use, pre-populate `~/.jcef-bundle/` or place `jcef-bundle/`
+next to the executable.
 
 ## How to Build & Run
 
-```powershell
+```bash
 # 1. Download JCEF JARs (needs internet/Nexus access) — run once
+./scripts/setup.sh                     # Linux/macOS or Git Bash
 .\scripts\setup.ps1                    # Windows PowerShell
-# ./scripts/setup.sh                  # Linux/macOS or Git Bash
 
 # 2. Build the full OSGi product
 mvn clean package
 
 # 3. Run the product (Equinox + Felix SCR wire the service automatically)
+# Windows:
 .\com.example.jcef.product\target\products\com.example.jcef.product\win32\win32\x86_64\jcef-browser.exe
+
+# macOS (Apple Silicon):
+./com.example.jcef.product/target/products/com.example.jcef.product/macosx/cocoa/aarch64/Eclipse.app/Contents/MacOS/jcef-browser
+
+# Linux:
+./com.example.jcef.product/target/products/com.example.jcef.product/linux/gtk/x86_64/jcef-browser
+```
+
+### macOS Notes
+
+JCEF on macOS requires special JVM flags that are already configured in the
+`.product` file:
+
+- **`-XstartOnFirstThread`** — macOS's AppKit requires the main thread to be the
+  UI thread. This flag tells the JVM to use the main thread as the AWT Event
+  Dispatch Thread. Think of it like a concert venue that only lets the first person
+  in line be the lead singer — macOS insists the main thread handles all UI.
+- **`--add-opens` flags** — JCEF's macOS code needs access to internal JDK packages
+  (`sun.awt`, `sun.lwawt`, `sun.lwawt.macosx`) to get native window handles. Java's
+  module system blocks this by default, so we explicitly open these packages. These
+  must use the `=` format (e.g. `--add-opens=java.desktop/sun.awt=ALL-UNNAMED`) —
+  the space-separated format gets swallowed by the Equinox native launcher.
+
+## JCEF Natives for Development
+
+During development, `mvn clean` wipes the `target/` directory — including any
+`jcef-bundle/` that was downloaded inside the product output. To avoid
+re-downloading ~100MB of Chromium binaries on every rebuild:
+
+1. Run the app once on a connected machine — natives download automatically
+2. They're saved to `~/.jcef-bundle/` (the stable fallback location)
+3. All subsequent runs (even after `mvn clean package`) reuse that copy
+
+You can also explicitly set the location:
+```bash
+# Override via system property (add to .product vmArgs or command line)
+-Djcef.install.dir=/path/to/jcef-bundle
 ```
 
 ## Airgapped Deployment Checklist
 
-1. On a connected machine, run `.\scripts\setup.ps1` — note the printed artifact list
+1. On a connected machine, run `./scripts/setup.sh` (or `.\scripts\setup.ps1`) — note the printed artifact list
 2. Ensure all listed Maven artifacts are in your Nexus (proxy Maven Central)
 3. Mirror the Eclipse p2 repo to a local path or HTTP server:
    ```
@@ -175,6 +224,8 @@ mvn clean package
    ```
 4. Update the `<url>` in the parent `pom.xml` p2 repository to point to your mirror
 5. Run `mvn clean package` to build the product
-6. Run the product once on a connected machine to extract JCEF natives to `jcef-bundle/`
-7. Deploy: copy the materialized product directory **and** `jcef-bundle/` to the airgapped machine
-8. On the airgapped machine: `jcef-browser.exe` — the `install.lock` skips any download
+6. Run the product once on a connected machine to download JCEF natives (saved to `~/.jcef-bundle/`)
+7. Deploy: copy the materialized product directory to the airgapped machine, **and** either:
+   - Copy `~/.jcef-bundle/` to the target user's home directory, **or**
+   - Copy it as `jcef-bundle/` next to the executable
+8. On the airgapped machine, run the executable — `install.lock` skips any download

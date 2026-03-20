@@ -19,7 +19,7 @@ import java.awt.event.WindowEvent;
 @Component(immediate = true)
 public class BrowserApp {
 
-    private static final String DEFAULT_URL = "https://www.example.com";
+    private static final String DEFAULT_URL = "http://localhost:18789/";
 
     private IBrowserService browserService;
 

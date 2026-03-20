@@ -12,7 +12,7 @@
 #
 # Windows users:
 #   Git Bash: run this script as-is (requires Git for Windows + Maven on PATH)
-#   PowerShell: use scripts/setup.ps1 instead
+#   PowerShell: use scripts/setup.ps1 instead 
 #
 set -euo pipefail
 
@@ -73,28 +73,26 @@ STAGING="$TMP_WORK_DIR/staging"
     -q
 
 # Rename to clean, predictable names that match MANIFEST.MF Bundle-ClassPath
-# Map: artifactId prefix -> clean name
-declare -A JAR_NAMES=(
-    [jcefmaven]="jcefmaven.jar"
-    [jcef-api]="jcef-api.jar"
-    [gluegen-rt]="gluegen-rt.jar"
-    [jogl-all]="jogl-all.jar"
-    [gson]="gson.jar"
-    [commons-compress]="commons-compress.jar"
-)
+# Uses a function instead of associative arrays for Bash 3.2 (macOS) compatibility
+clean_jar_name() {
+    case "$1" in
+        jcefmaven*)       echo "jcefmaven.jar" ;;
+        jcef-api*)        echo "jcef-api.jar" ;;
+        gluegen-rt*)      echo "gluegen-rt.jar" ;;
+        jogl-all*)        echo "jogl-all.jar" ;;
+        gson*)            echo "gson.jar" ;;
+        commons-compress*) echo "commons-compress.jar" ;;
+        *)                echo "" ;;
+    esac
+}
 
 for jar in "$STAGING"/*.jar; do
     BASENAME=$(basename "$jar")
-    MATCHED=0
-    for prefix in "${!JAR_NAMES[@]}"; do
-        if [[ "$BASENAME" == "${prefix}"* ]]; then
-            cp "$jar" "$LIB_DIR/${JAR_NAMES[$prefix]}"
-            echo "  $BASENAME -> ${JAR_NAMES[$prefix]}"
-            MATCHED=1
-            break
-        fi
-    done
-    if [ "$MATCHED" -eq 0 ]; then
+    CLEAN=$(clean_jar_name "$BASENAME")
+    if [ -n "$CLEAN" ]; then
+        cp "$jar" "$LIB_DIR/$CLEAN"
+        echo "  $BASENAME -> $CLEAN"
+    else
         echo "  WARNING: unexpected JAR $BASENAME (copying as-is)"
         cp "$jar" "$LIB_DIR/$BASENAME"
     fi

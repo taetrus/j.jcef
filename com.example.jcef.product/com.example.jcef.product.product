@@ -8,7 +8,7 @@
 
    <launcherArgs>
       <!-- macOS requires CEF on the main/AppKit thread -->
-      <vmArgsMac>-XstartOnFirstThread</vmArgsMac>
+      <vmArgsMac>-XstartOnFirstThread --add-opens=java.desktop/sun.awt=ALL-UNNAMED --add-opens=java.desktop/sun.lwawt=ALL-UNNAMED --add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED</vmArgsMac>
    </launcherArgs>
 
    <!-- Native executable name (produces jcef-browser.exe on Windows) -->
@@ -57,6 +57,9 @@
       <!-- Keep the framework alive after all bundles start (no Eclipse application) -->
       <property name="osgi.noShutdown"   value="true"/>
       <property name="eclipse.ignoreApp" value="true"/>
+
+      <!-- Allow OSGi bundles to access JDK-internal sun.awt (needed by JCEF on macOS) -->
+      <property name="osgi.bootdelegation" value="sun.awt,sun.awt.*,java.awt.peer"/>
    </configurations>
 
 </product>
