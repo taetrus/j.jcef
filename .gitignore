@@ -3,7 +3,7 @@ bin/
 *.class
 
 # JCEF JARs downloaded by setup script (re-generate with scripts/setup.sh)
-com.example.jcef.app/lib/*.jar
+com.example.jcef.browser/lib/*.jar
 
 # JCEF native binaries (extracted at runtime)
 jcef-bundle/

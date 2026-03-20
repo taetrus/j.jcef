@@ -35,7 +35,10 @@
       <plugin id="org.apache.felix.gogo.shell"/>
       <plugin id="org.apache.felix.gogo.command"/>
 
-      <!-- ── Application bundle ────────────────────────────────────── -->
+      <!-- ── JCEF browser service ─────────────────────────────────── -->
+      <plugin id="com.example.jcef.browser"/>
+
+      <!-- ── Application bundle (consumes browser service) ────────── -->
       <plugin id="com.example.jcef.app"/>
    </plugins>
 
@@ -48,6 +51,7 @@
       <plugin id="org.apache.felix.gogo.runtime" autoStart="true" startLevel="3"/>
       <plugin id="org.apache.felix.gogo.shell"   autoStart="true" startLevel="3"/>
       <plugin id="org.apache.felix.gogo.command" autoStart="true" startLevel="3"/>
+      <plugin id="com.example.jcef.browser"    autoStart="true" startLevel="3"/>
       <plugin id="com.example.jcef.app"        autoStart="true" startLevel="4"/>
 
       <!-- Keep the framework alive after all bundles start (no Eclipse application) -->

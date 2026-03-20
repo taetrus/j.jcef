@@ -18,7 +18,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-LIB_DIR="$PROJECT_DIR/com.example.jcef.app/lib"
+LIB_DIR="$PROJECT_DIR/com.example.jcef.browser/lib"
 JCEF_VERSION="${JCEF_VERSION:-122.1.10}"
 MAVEN_REPO_URL="${MAVEN_REPO_URL:-https://repo1.maven.org/maven2}"
 
@@ -104,7 +104,7 @@ echo ""
 # ── Step 2: Verify Bundle-ClassPath matches downloaded JARs ──────────────────
 
 echo "── Verifying MANIFEST.MF Bundle-ClassPath ──"
-MANIFEST="$PROJECT_DIR/com.example.jcef.app/META-INF/MANIFEST.MF"
+MANIFEST="$PROJECT_DIR/com.example.jcef.browser/META-INF/MANIFEST.MF"
 MISSING=0
 for jar in "$LIB_DIR"/*.jar; do
     JAR_NAME=$(basename "$jar")
