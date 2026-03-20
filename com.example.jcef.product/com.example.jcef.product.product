@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+<product name="JCEF Browser"
+         uid="com.example.jcef.product"
+         version="1.0.0.qualifier"
+         useFeatures="false"
+         includeLaunchers="true">
+
+   <launcherArgs>
+      <!-- macOS requires CEF on the main/AppKit thread -->
+      <vmArgsMac>-XstartOnFirstThread</vmArgsMac>
+   </launcherArgs>
+
+   <!-- Native executable name (produces jcef-browser.exe on Windows) -->
+   <launcher name="jcef-browser">
+      <win useIco="false"/>
+   </launcher>
+
+   <plugins>
+      <!-- ── OSGi framework (Equinox) ──────────────────────────────── -->
+      <plugin id="org.eclipse.osgi"/>
+
+      <!-- ── Declarative Services runtime (Felix SCR) ──────────────── -->
+      <plugin id="org.apache.felix.scr"/>
+      <plugin id="org.osgi.service.component"/>
+      <plugin id="org.osgi.util.function"/>
+      <plugin id="org.osgi.util.promise"/>
+
+      <!-- ── Equinox utilities ──────────────────────────────────────── -->
+      <plugin id="org.eclipse.equinox.common"/>
+
+      <!-- ── Gogo shell (OSGi console for debugging) ───────────────── -->
+      <plugin id="org.eclipse.equinox.console"/>
+      <plugin id="org.apache.felix.gogo.runtime"/>
+      <plugin id="org.apache.felix.gogo.shell"/>
+      <plugin id="org.apache.felix.gogo.command"/>
+
+      <!-- ── Application bundle ────────────────────────────────────── -->
+      <plugin id="com.example.jcef.app"/>
+   </plugins>
+
+   <configurations>
+      <!-- Start levels: framework(-1) → SCR+common(2) → console(3) → app(4) -->
+      <plugin id="org.eclipse.osgi"            autoStart="true" startLevel="-1"/>
+      <plugin id="org.eclipse.equinox.common"  autoStart="true" startLevel="2"/>
+      <plugin id="org.apache.felix.scr"        autoStart="true" startLevel="2"/>
+      <plugin id="org.eclipse.equinox.console" autoStart="true" startLevel="3"/>
+      <plugin id="org.apache.felix.gogo.runtime" autoStart="true" startLevel="3"/>
+      <plugin id="org.apache.felix.gogo.shell"   autoStart="true" startLevel="3"/>
+      <plugin id="org.apache.felix.gogo.command" autoStart="true" startLevel="3"/>
+      <plugin id="com.example.jcef.app"        autoStart="true" startLevel="4"/>
+
+      <!-- Keep the framework alive after all bundles start (no Eclipse application) -->
+      <property name="osgi.noShutdown"   value="true"/>
+      <property name="eclipse.ignoreApp" value="true"/>
+   </configurations>
+
+</product>
